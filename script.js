@@ -1,62 +1,98 @@
-const $ = (q)=>document.querySelector(q);
-const library = $('#library'), reader = $('#reader'), page = $('#page');
-const pageImg = $('#pageImg'), chapter = $('#chapter'), pageTitle = $('#pageTitle'), pageText = $('#pageText');
-const pageCounter = $('#pageCounter'), dots = $('#dots'), particles = $('#particles');
-let book = STORYBOOK.books.jeju1, idx = 0, audioOn = false, audioCtx = null;
+const $ = (s)=>document.querySelector(s);
+let currentBook = null;
+let pageIndex = 0;
+let audioCtx = null;
+let soundOn = false;
 
 function initAudio(){
-  if(audioCtx) return;
-  audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-  audioOn = true;
+  if(!audioCtx){ audioCtx = new (window.AudioContext || window.webkitAudioContext)(); }
+  if(audioCtx.state === 'suspended') audioCtx.resume();
 }
-function tone(freq=440, dur=.12, type='sine', vol=.05){
-  if(!audioOn || !audioCtx) return;
-  const o=audioCtx.createOscillator(), g=audioCtx.createGain();
-  o.type=type; o.frequency.value=freq; g.gain.value=vol;
-  o.connect(g); g.connect(audioCtx.destination); o.start();
-  g.gain.exponentialRampToValueAtTime(.0001, audioCtx.currentTime+dur); o.stop(audioCtx.currentTime+dur);
-}
-function trainSound(){ [180,220,180,260].forEach((f,i)=>setTimeout(()=>tone(f,.13,'square',.035),i*140)); }
-function pageSound(){ tone(640,.07,'triangle',.035); setTimeout(()=>tone(320,.08,'triangle',.025),70); }
-function cameraSound(){ tone(900,.05,'square',.035); setTimeout(()=>tone(1200,.04,'square',.025),65); }
-
-function start(){ initAudio(); library.classList.add('hidden'); reader.classList.remove('hidden'); idx=0; render(); trainSound(); }
-function render(dir='next'){
-  const p = book.pages[idx];
-  page.classList.remove('active','flipping-next','flipping-prev'); void page.offsetWidth;
-  page.classList.add(dir==='prev'?'flipping-prev':'flipping-next');
-  pageImg.src = p.image; pageImg.alt = p.title; pageImg.style.objectPosition = p.pos || 'center';
-  chapter.textContent = p.chapter; pageTitle.textContent = p.title; pageText.textContent = p.text;
-  $('#bookTitle').textContent = book.title; pageCounter.textContent = `${idx+1} / ${book.pages.length}`;
-  dots.innerHTML = book.pages.map((_,i)=>`<span class="dot ${i===idx?'active':''}"></span>`).join('');
-  setTimeout(()=>page.classList.add('active'),80);
-  makeEffect(p.effect, p.type);
-  if(audioOn){ pageSound(); if(p.effect==='spark') cameraSound(); }
-}
-function next(){ if(idx < book.pages.length-1){ idx++; render('next'); } else { showMemories(); } }
-function prev(){ if(idx>0){ idx--; render('prev'); } }
-function showMemories(){
-  const strip=document.createElement('div'); strip.className='photo-strip';
-  strip.innerHTML = book.memories.map(s=>`<img src="${s}" alt="제주도 추억 사진">`).join('');
-  document.body.appendChild(strip); setTimeout(()=>strip.remove(),9000); trainSound();
-}
-function makeEffect(effect){
-  particles.innerHTML='';
-  if(effect==='wave') { const w=document.createElement('div'); w.className='wave-line'; particles.appendChild(w); }
-  const map={flower:['🌼','🌸','💛'],heart:['💛','🤍','✨'],bubble:['🫧','💧'],spark:['✨','📸','💛'],pop:['✨','⭐'],wave:['🌊','🐚','🪽']};
-  const arr=map[effect]||['✨'];
-  for(let i=0;i<26;i++){
-    const el=document.createElement('span'); el.className='particle'; el.textContent=arr[Math.floor(Math.random()*arr.length)];
-    el.style.left=Math.random()*100+'%'; el.style.animationDuration=(4+Math.random()*5)+'s'; el.style.animationDelay=(Math.random()*2)+'s'; el.style.fontSize=(16+Math.random()*18)+'px';
-    particles.appendChild(el);
+function beep(type='page'){
+  if(!soundOn || !audioCtx) return;
+  const now = audioCtx.currentTime;
+  const osc = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
+  osc.connect(gain); gain.connect(audioCtx.destination);
+  if(type==='train'){
+    osc.frequency.setValueAtTime(220, now); osc.frequency.exponentialRampToValueAtTime(360, now+.25);
+    gain.gain.setValueAtTime(.0001, now); gain.gain.exponentialRampToValueAtTime(.12, now+.04); gain.gain.exponentialRampToValueAtTime(.0001, now+.45);
+    osc.start(now); osc.stop(now+.48);
+  } else {
+    osc.type='triangle'; osc.frequency.setValueAtTime(660, now); osc.frequency.exponentialRampToValueAtTime(330, now+.14);
+    gain.gain.setValueAtTime(.0001, now); gain.gain.exponentialRampToValueAtTime(.08, now+.02); gain.gain.exponentialRampToValueAtTime(.0001, now+.22);
+    osc.start(now); osc.stop(now+.24);
   }
 }
 
-$('#startBtn').addEventListener('click',start);
-$('#nextBtn').addEventListener('click',next); $('#prevBtn').addEventListener('click',prev);
-$('#nextTap').addEventListener('click',next); $('#prevTap').addEventListener('click',prev);
-$('#homeBtn').addEventListener('click',()=>{reader.classList.add('hidden'); library.classList.remove('hidden');});
-$('#soundBtn').addEventListener('click',()=>{ if(!audioCtx) initAudio(); audioOn=!audioOn; $('#soundBtn').textContent=audioOn?'🔊':'🔇'; if(audioOn) trainSound(); });
-window.addEventListener('keydown',e=>{ if(e.key==='ArrowRight') next(); if(e.key==='ArrowLeft') prev(); });
-let sx=0; reader.addEventListener('touchstart',e=>sx=e.touches[0].clientX,{passive:true});
-reader.addEventListener('touchend',e=>{const dx=e.changedTouches[0].clientX-sx; if(Math.abs(dx)>50) dx<0?next():prev();},{passive:true});
+function renderShelf(){
+  const shelf = $('#bookshelf');
+  shelf.innerHTML = BOOKS.map(book => `
+    <button class="book-card ${book.theme}" data-book="${book.id}">
+      <img src="${book.cover}" alt="${book.title}" onerror="this.closest('.book-card').classList.add('image-error')" />
+      <span class="badge">${book.emoji}</span>
+      <div class="book-info"><strong>${book.title}</strong><small>${book.subtitle}</small></div>
+    </button>
+  `).join('');
+  document.querySelectorAll('.book-card').forEach(btn=>{
+    btn.addEventListener('click', ()=> openBook(btn.dataset.book));
+    btn.addEventListener('touchend', (e)=>{ e.preventDefault(); openBook(btn.dataset.book); }, {passive:false});
+  });
+}
+
+function openBook(id){
+  initAudio();
+  const book = BOOKS.find(b=>b.id===id);
+  if(!book) return;
+  currentBook = book; pageIndex = 0;
+  $('#library').classList.remove('active');
+  $('#reader').classList.add('active');
+  $('#bookTitle').textContent = book.title;
+  document.body.dataset.theme = book.theme;
+  showPage(0, 'next');
+  soundOn = true;
+  $('#soundBtn').textContent='🔊 소리';
+  beep(id==='train'?'train':'page');
+}
+function closeBook(){
+  $('#reader').classList.remove('active');
+  $('#library').classList.add('active');
+  currentBook = null;
+}
+function showPage(nextIndex, dir='next'){
+  if(!currentBook) return;
+  const max = currentBook.pages.length - 1;
+  nextIndex = Math.max(0, Math.min(max, nextIndex));
+  const card = $('#page');
+  card.classList.remove('flip-next','flip-prev'); void card.offsetWidth;
+  card.classList.add(dir==='next'?'flip-next':'flip-prev');
+  pageIndex = nextIndex;
+  const p = currentBook.pages[pageIndex];
+  $('#pageImg').src = p.image;
+  $('#pageImg').alt = p.title;
+  $('#pageKicker').textContent = p.kicker;
+  $('#pageTitle').textContent = p.title;
+  $('#pageText').textContent = p.text;
+  $('#pageCounter').textContent = `${pageIndex+1} / ${currentBook.pages.length}`;
+  $('#dots').innerHTML = currentBook.pages.map((_,i)=>`<button class="dot ${i===pageIndex?'active':''}" data-i="${i}" aria-label="${i+1}페이지"></button>`).join('');
+  document.querySelectorAll('.dot').forEach(d=>d.onclick=()=>showPage(Number(d.dataset.i), Number(d.dataset.i)>pageIndex?'next':'prev'));
+  setEffects(currentBook.theme);
+  beep('page');
+}
+function next(){ if(currentBook) showPage(pageIndex+1,'next'); }
+function prev(){ if(currentBook) showPage(pageIndex-1,'prev'); }
+function setEffects(theme){
+  const layer = $('#effects');
+  const icon = theme==='sea'?'•':theme==='flower'?'✿':theme==='spring'?'❀':'•';
+  layer.innerHTML = Array.from({length:18},(_,i)=>`<i style="left:${(i*17)%100}%;animation-delay:${(i*.37)%5}s;animation-duration:${5+(i%5)}s">${icon}</i>`).join('');
+}
+
+renderShelf();
+$('#backBtn').onclick = closeBook;
+$('#nextBtn').onclick = next; $('#prevBtn').onclick = prev;
+$('#nextTap').onclick = next; $('#prevTap').onclick = prev;
+$('#soundBtn').onclick = ()=>{ initAudio(); soundOn=!soundOn; $('#soundBtn').textContent=soundOn?'🔊 소리':'🔈 소리'; if(soundOn) beep('train'); };
+window.addEventListener('keydown', e=>{ if(e.key==='ArrowRight') next(); if(e.key==='ArrowLeft') prev(); if(e.key==='Escape') closeBook(); });
+let sx=0, sy=0;
+window.addEventListener('touchstart', e=>{ sx=e.touches[0].clientX; sy=e.touches[0].clientY; }, {passive:true});
+window.addEventListener('touchend', e=>{ const dx=e.changedTouches[0].clientX-sx; const dy=e.changedTouches[0].clientY-sy; if(Math.abs(dx)>55 && Math.abs(dx)>Math.abs(dy)){ dx<0?next():prev(); } }, {passive:true});

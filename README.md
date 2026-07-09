@@ -1,24 +1,29 @@
-# 우진이의 기차 여행
+# 우진이의 제주도 여행 Part 1
 
 아이패드/GitHub Pages용 인터랙티브 전자 동화책입니다.
 
 ## GitHub 업로드 방법
 
-1. 이 ZIP 파일을 압축 해제합니다.
-2. GitHub 저장소 `WooJinBook`에 기존 파일을 모두 덮어씁니다.
-3. `index.html`, `style.css`, `script.js`, `data.js`, `assets/` 폴더가 루트에 있어야 합니다.
+1. ZIP 압축을 풉니다.
+2. `WooJinBook` 저장소 루트에 모든 파일을 덮어씌웁니다.
+3. 루트에 아래 파일이 있어야 합니다.
+   - `index.html`
+   - `style.css`
+   - `script.js`
+   - `data.js`
+   - `assets/`
 4. GitHub Pages 주소로 접속합니다.
 
-## 내용 수정 방법
+## 수정 방법
 
-`data.js` 파일만 수정하면 됩니다.
+스토리 문구는 `data.js`에서 수정하면 됩니다.
 
-- 페이지 제목/문구 수정: `pages` 항목
-- 그림 교체: `assets/pages/` 이미지 파일 교체
-- 실제 사진 추가: `assets/photos/`에 사진 추가 후 `memories` 항목에 추가
+## 사진 추가
 
-## 추천 이미지 크기
+- Part 1 사진: `assets/jeju-part1/`
+- 추억 앨범 사진: `assets/photos/`
+- Part 2는 `assets/jeju-part2/`에 사진을 넣고 `data.js`에 페이지를 추가하면 됩니다.
 
-- 그림책 페이지: 1920x1080 또는 3840x2160
-- 실제 사진: 긴 변 1400px 이상
+## 모바일 사운드
 
+아이폰/아이패드는 보안 정책 때문에 `제주 여행 시작하기` 버튼을 눌러야 소리가 시작됩니다.

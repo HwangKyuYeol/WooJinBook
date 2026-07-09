@@ -1,1 +1,62 @@
-const D=window.BOOK_DATA;const $=s=>document.querySelector(s);const book=$('#book'),particles=$('#particles');let page=0,busy=false,sound=false,ctx=null;function tone(kind='page'){if(!sound)return;ctx=ctx||new(window.AudioContext||window.webkitAudioContext)();const t=ctx.currentTime,o=ctx.createOscillator(),g=ctx.createGain();o.connect(g);g.connect(ctx.destination);o.type=kind==='train'?'sawtooth':'triangle';o.frequency.setValueAtTime(kind==='train'?160:520,t);o.frequency.exponentialRampToValueAtTime(kind==='train'?80:260,t+.22);g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(.055,t+.03);g.gain.exponentialRampToValueAtTime(.0001,t+.24);o.start(t);o.stop(t+.26)}function build(){book.innerHTML=D.pages.map((p,i)=>`<section class="page ${i===0?'active':''}" data-season="${p.season}"><img src="${p.image}" alt="${p.title}"><div class="story"><b>${p.title}</b><span>${p.text}</span></div></section>`).join('');$('#bookTitle').textContent=D.title;albumGrid.innerHTML=D.memories.map(m=>`<div class="memory"><img src="${m.image}" alt="${m.caption}"><span>${m.caption}</span></div>`).join('');sync()}function effects(season){particles.innerHTML='';const m={spring:['🌸','🌼'],summer:['✨','🌊'],autumn:['🍂','🍁'],winter:['❄️','☃️'],gold:['⭐','💛']},arr=m[season]||m.spring;for(let i=0;i<34;i++){let s=document.createElement('span');s.className='particle';s.textContent=arr[i%arr.length];s.style.left=Math.random()*100+'vw';s.style.animationDuration=6+Math.random()*9+'s';s.style.animationDelay=-Math.random()*8+'s';s.style.setProperty('--x',Math.random()*260-130+'px');particles.appendChild(s)}}function sync(){let p=D.pages[page];$('#chapter').textContent=p.title;$('#counter').textContent=`${page+1} / ${D.pages.length}`;$('#progressBar').style.width=(page+1)/D.pages.length*100+'%';$('#prevBtn').style.opacity=page?1:.45;$('#nextBtn').textContent=page===D.pages.length-1?'추억 보기':'다음 →';effects(p.season)}function go(n){if(busy||n<0||n>=D.pages.length||n===page)return;busy=true;const pages=[...document.querySelectorAll('.page')],old=pages[page],neu=pages[n];neu.className='page active';old.classList.add('flip-out');page=n;sync();tone('page');setTimeout(()=>{old.className='page';busy=false},820)}function next(){page===D.pages.length-1?showAlbum():go(page+1)}function prev(){go(page-1)}function showReader(){intro.classList.add('hidden');album.classList.add('hidden');reader.classList.remove('hidden');tone('train')}function showAlbum(){reader.classList.add('hidden');album.classList.remove('hidden');effects('gold');tone('train')}function restart(){album.classList.add('hidden');reader.classList.remove('hidden');document.querySelectorAll('.page').forEach((p,i)=>p.className='page '+(i===0?'active':''));page=0;sync()}startBtn.onclick=showReader;homeBtn.onclick=()=>{reader.classList.add('hidden');album.classList.add('hidden');intro.classList.remove('hidden')};soundBtn.onclick=()=>{sound=!sound;soundBtn.textContent=sound?'🔊':'🔇';tone('train')};nextBtn.onclick=next;prevBtn.onclick=prev;nextZone.onclick=next;prevZone.onclick=prev;restartBtn.onclick=restart;let sx=0,sy=0;addEventListener('touchstart',e=>{sx=e.touches[0].clientX;sy=e.touches[0].clientY},{passive:true});addEventListener('touchend',e=>{let dx=e.changedTouches[0].clientX-sx,dy=e.changedTouches[0].clientY-sy;if(Math.abs(dx)>46&&Math.abs(dx)>Math.abs(dy))dx<0?next():prev()},{passive:true});addEventListener('keydown',e=>{if(e.key==='ArrowRight'||e.key===' ')next();if(e.key==='ArrowLeft')prev();if(e.key==='Escape')homeBtn.click()});build();
+const $ = (q)=>document.querySelector(q);
+const library = $('#library'), reader = $('#reader'), page = $('#page');
+const pageImg = $('#pageImg'), chapter = $('#chapter'), pageTitle = $('#pageTitle'), pageText = $('#pageText');
+const pageCounter = $('#pageCounter'), dots = $('#dots'), particles = $('#particles');
+let book = STORYBOOK.books.jeju1, idx = 0, audioOn = false, audioCtx = null;
+
+function initAudio(){
+  if(audioCtx) return;
+  audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  audioOn = true;
+}
+function tone(freq=440, dur=.12, type='sine', vol=.05){
+  if(!audioOn || !audioCtx) return;
+  const o=audioCtx.createOscillator(), g=audioCtx.createGain();
+  o.type=type; o.frequency.value=freq; g.gain.value=vol;
+  o.connect(g); g.connect(audioCtx.destination); o.start();
+  g.gain.exponentialRampToValueAtTime(.0001, audioCtx.currentTime+dur); o.stop(audioCtx.currentTime+dur);
+}
+function trainSound(){ [180,220,180,260].forEach((f,i)=>setTimeout(()=>tone(f,.13,'square',.035),i*140)); }
+function pageSound(){ tone(640,.07,'triangle',.035); setTimeout(()=>tone(320,.08,'triangle',.025),70); }
+function cameraSound(){ tone(900,.05,'square',.035); setTimeout(()=>tone(1200,.04,'square',.025),65); }
+
+function start(){ initAudio(); library.classList.add('hidden'); reader.classList.remove('hidden'); idx=0; render(); trainSound(); }
+function render(dir='next'){
+  const p = book.pages[idx];
+  page.classList.remove('active','flipping-next','flipping-prev'); void page.offsetWidth;
+  page.classList.add(dir==='prev'?'flipping-prev':'flipping-next');
+  pageImg.src = p.image; pageImg.alt = p.title; pageImg.style.objectPosition = p.pos || 'center';
+  chapter.textContent = p.chapter; pageTitle.textContent = p.title; pageText.textContent = p.text;
+  $('#bookTitle').textContent = book.title; pageCounter.textContent = `${idx+1} / ${book.pages.length}`;
+  dots.innerHTML = book.pages.map((_,i)=>`<span class="dot ${i===idx?'active':''}"></span>`).join('');
+  setTimeout(()=>page.classList.add('active'),80);
+  makeEffect(p.effect, p.type);
+  if(audioOn){ pageSound(); if(p.effect==='spark') cameraSound(); }
+}
+function next(){ if(idx < book.pages.length-1){ idx++; render('next'); } else { showMemories(); } }
+function prev(){ if(idx>0){ idx--; render('prev'); } }
+function showMemories(){
+  const strip=document.createElement('div'); strip.className='photo-strip';
+  strip.innerHTML = book.memories.map(s=>`<img src="${s}" alt="제주도 추억 사진">`).join('');
+  document.body.appendChild(strip); setTimeout(()=>strip.remove(),9000); trainSound();
+}
+function makeEffect(effect){
+  particles.innerHTML='';
+  if(effect==='wave') { const w=document.createElement('div'); w.className='wave-line'; particles.appendChild(w); }
+  const map={flower:['🌼','🌸','💛'],heart:['💛','🤍','✨'],bubble:['🫧','💧'],spark:['✨','📸','💛'],pop:['✨','⭐'],wave:['🌊','🐚','🪽']};
+  const arr=map[effect]||['✨'];
+  for(let i=0;i<26;i++){
+    const el=document.createElement('span'); el.className='particle'; el.textContent=arr[Math.floor(Math.random()*arr.length)];
+    el.style.left=Math.random()*100+'%'; el.style.animationDuration=(4+Math.random()*5)+'s'; el.style.animationDelay=(Math.random()*2)+'s'; el.style.fontSize=(16+Math.random()*18)+'px';
+    particles.appendChild(el);
+  }
+}
+
+$('#startBtn').addEventListener('click',start);
+$('#nextBtn').addEventListener('click',next); $('#prevBtn').addEventListener('click',prev);
+$('#nextTap').addEventListener('click',next); $('#prevTap').addEventListener('click',prev);
+$('#homeBtn').addEventListener('click',()=>{reader.classList.add('hidden'); library.classList.remove('hidden');});
+$('#soundBtn').addEventListener('click',()=>{ if(!audioCtx) initAudio(); audioOn=!audioOn; $('#soundBtn').textContent=audioOn?'🔊':'🔇'; if(audioOn) trainSound(); });
+window.addEventListener('keydown',e=>{ if(e.key==='ArrowRight') next(); if(e.key==='ArrowLeft') prev(); });
+let sx=0; reader.addEventListener('touchstart',e=>sx=e.touches[0].clientX,{passive:true});
+reader.addEventListener('touchend',e=>{const dx=e.changedTouches[0].clientX-sx; if(Math.abs(dx)>50) dx<0?next():prev();},{passive:true});

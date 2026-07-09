@@ -3,53 +3,68 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <meta name="theme-color" content="#06172f" />
-  <title>우진이의 기차 여행</title>
+  <meta name="theme-color" content="#5fc6d8" />
+  <title>우진이의 제주도 여행</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
   <div id="app" class="app">
-    <div id="particles" class="particles"></div>
-
-    <section id="intro" class="intro">
-      <div class="cloud c1"></div><div class="cloud c2"></div>
-      <div class="intro-card">
-        <p class="eyebrow">아빠와 함께 만든 첫 번째 그림책</p>
-        <h1>우진이의<br>기차 여행</h1>
-        <p>봄, 여름, 가을, 겨울을 지나 행복역으로 떠나요.</p>
-        <button id="startBtn" class="start-btn">📖 여행 시작하기</button>
+    <section id="library" class="library">
+      <div class="sky"></div>
+      <div class="library-card">
+        <p class="eyebrow">Woojin Memory Storybook</p>
+        <h1>우진이의 제주도 여행</h1>
+        <p class="subtitle">엄마 아빠와 함께한 첫 번째 제주 이야기</p>
+        <div class="book-list">
+          <button class="book-cover active" data-book="jeju1">
+            <span>PART 1</span>
+            <strong>노란 꽃길과<br>파란 바다</strong>
+            <em>읽기</em>
+          </button>
+          <button class="book-cover soon" data-book="jeju2">
+            <span>PART 2</span>
+            <strong>다음 제주 이야기</strong>
+            <em>준비중</em>
+          </button>
+        </div>
+        <button id="startBtn" class="primary">📖 제주 여행 시작하기</button>
+        <p class="notice">아이폰/아이패드는 시작 버튼을 눌러야 소리가 켜져요.</p>
       </div>
-      <div class="intro-train">🚂</div>
     </section>
 
-    <main id="reader" class="reader hidden" aria-live="polite">
+    <section id="reader" class="reader hidden">
+      <div id="particles" class="particles"></div>
       <header class="reader-top">
-        <button id="homeBtn" class="round">⌂</button>
-        <div><strong id="bookTitle">우진이의 기차 여행</strong><span id="chapter">표지</span></div>
-        <button id="soundBtn" class="round">🔇</button>
+        <button id="homeBtn" class="ghost">← 책장</button>
+        <div>
+          <strong id="bookTitle">우진이의 제주도 여행</strong>
+          <span id="pageCounter">1 / 12</span>
+        </div>
+        <button id="soundBtn" class="ghost">🔊</button>
       </header>
 
-      <div id="book" class="book"></div>
+      <main id="stage" class="stage" aria-live="polite">
+        <article id="page" class="page-card">
+          <img id="pageImg" alt="" />
+          <div class="shade"></div>
+          <div class="story-box">
+            <p id="chapter" class="chapter"></p>
+            <h2 id="pageTitle"></h2>
+            <p id="pageText"></p>
+          </div>
+        </article>
+      </main>
 
-      <button id="prevZone" class="zone left" aria-label="이전"></button>
-      <button id="nextZone" class="zone right" aria-label="다음"></button>
+      <button id="prevTap" class="tap left" aria-label="이전 페이지"></button>
+      <button id="nextTap" class="tap right" aria-label="다음 페이지"></button>
 
       <footer class="reader-bottom">
-        <button id="prevBtn" class="nav">← 이전</button>
-        <div class="progress"><span id="progressBar"></span></div>
-        <span id="counter" class="counter">1 / 6</span>
-        <button id="nextBtn" class="nav primary">다음 →</button>
+        <button id="prevBtn">← 이전</button>
+        <div id="dots" class="dots"></div>
+        <button id="nextBtn">다음 →</button>
       </footer>
-    </main>
-
-    <section id="album" class="album hidden">
-      <h2>우진이의 진짜 추억</h2>
-      <p>그림책이 끝나면 실제 사진으로 다시 만나는 우진이의 하루.</p>
-      <div id="albumGrid" class="album-grid"></div>
-      <button id="restartBtn" class="start-btn small">처음부터 다시 보기</button>
     </section>
   </div>
-
   <script src="data.js"></script>
   <script src="script.js"></script>
 </body>

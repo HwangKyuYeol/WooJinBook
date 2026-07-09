@@ -3,68 +3,54 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <meta name="theme-color" content="#10182f" />
+  <meta name="theme-color" content="#06172f" />
   <title>우진이의 기차 여행</title>
-  <link rel="preload" as="image" href="assets/01_cover.jpg">
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <div class="app" id="app">
-    <div class="sky-effects" id="effects"></div>
+  <div id="app" class="app">
+    <div id="particles" class="particles"></div>
 
-    <header class="topbar">
-      <button class="icon-btn" id="homeBtn" aria-label="처음으로">⌂</button>
-      <div class="brand">
-        <strong>우진이의 기차 여행</strong>
-        <span id="chapterName">표지</span>
+    <section id="intro" class="intro">
+      <div class="cloud c1"></div><div class="cloud c2"></div>
+      <div class="intro-card">
+        <p class="eyebrow">아빠와 함께 만든 첫 번째 그림책</p>
+        <h1>우진이의<br>기차 여행</h1>
+        <p>봄, 여름, 가을, 겨울을 지나 행복역으로 떠나요.</p>
+        <button id="startBtn" class="start-btn">📖 여행 시작하기</button>
       </div>
-      <button class="icon-btn" id="soundBtn" aria-label="소리 켜기">🔇</button>
-    </header>
+      <div class="intro-train">🚂</div>
+    </section>
 
-    <main class="stage" id="stage" aria-live="polite">
-      <section class="page active" data-title="표지" data-season="spring">
-        <img src="assets/01_cover.jpg" alt="우진이의 기차 여행 표지" />
-        <div class="story-card cover-card">
-          <b>우진이의 기차 여행</b>
-          <span>칙칙폭폭, 사계절 여행을 떠나요!</span>
-        </div>
-      </section>
-      <section class="page" data-title="봄" data-season="spring">
-        <img src="assets/02_spring.jpg" alt="봄 벚꽃길을 달리는 기차" />
-        <div class="story-card"><b>봄</b><span>따뜻한 봄바람이 불어요. 우진이는 꽃길을 보며 “와, 예쁘다!” 하고 웃었어요.</span></div>
-      </section>
-      <section class="page" data-title="여름" data-season="summer">
-        <img src="assets/03_summer.jpg" alt="여름 바다 옆을 달리는 기차" />
-        <div class="story-card"><b>여름</b><span>파란 바다가 반짝반짝! 기차는 시원한 바람을 싣고 바닷가를 달렸어요.</span></div>
-      </section>
-      <section class="page" data-title="가을" data-season="autumn">
-        <img src="assets/04_autumn.jpg" alt="가을 단풍길을 달리는 기차" />
-        <div class="story-card"><b>가을</b><span>알록달록 단풍잎이 춤을 춰요. 우진이는 창밖에 손을 흔들었어요.</span></div>
-      </section>
-      <section class="page" data-title="겨울" data-season="winter">
-        <img src="assets/05_winter.jpg" alt="겨울 눈마을을 지나는 기차" />
-        <div class="story-card"><b>겨울</b><span>하얀 눈이 소복소복 내려요. 우진이는 눈사람에게 반갑게 인사했어요.</span></div>
-      </section>
-      <section class="page" data-title="행복역" data-season="gold">
-        <img src="assets/06_happy_station.jpg" alt="행복역에 도착한 우진이" />
-        <div class="story-card"><b>행복역</b><span>모든 계절을 지나 도착했어요. “다음 여행도 함께 떠나요!”</span></div>
-      </section>
+    <main id="reader" class="reader hidden" aria-live="polite">
+      <header class="reader-top">
+        <button id="homeBtn" class="round">⌂</button>
+        <div><strong id="bookTitle">우진이의 기차 여행</strong><span id="chapter">표지</span></div>
+        <button id="soundBtn" class="round">🔇</button>
+      </header>
+
+      <div id="book" class="book"></div>
+
+      <button id="prevZone" class="zone left" aria-label="이전"></button>
+      <button id="nextZone" class="zone right" aria-label="다음"></button>
+
+      <footer class="reader-bottom">
+        <button id="prevBtn" class="nav">← 이전</button>
+        <div class="progress"><span id="progressBar"></span></div>
+        <span id="counter" class="counter">1 / 6</span>
+        <button id="nextBtn" class="nav primary">다음 →</button>
+      </footer>
     </main>
 
-    <button class="tap-zone left" id="prevZone" aria-label="이전 페이지"></button>
-    <button class="tap-zone right" id="nextZone" aria-label="다음 페이지"></button>
-
-    <footer class="bottom-ui">
-      <button class="nav-btn" id="prevBtn">← 이전</button>
-      <div class="progress"><div id="bar"></div></div>
-      <span class="counter" id="counter">1 / 6</span>
-      <button class="nav-btn primary" id="nextBtn">다음 →</button>
-    </footer>
-
-    <div class="train-runner" aria-hidden="true">🚂</div>
-    <div class="toast" id="toast">화면 오른쪽을 누르거나 스와이프해보세요</div>
+    <section id="album" class="album hidden">
+      <h2>우진이의 진짜 추억</h2>
+      <p>그림책이 끝나면 실제 사진으로 다시 만나는 우진이의 하루.</p>
+      <div id="albumGrid" class="album-grid"></div>
+      <button id="restartBtn" class="start-btn small">처음부터 다시 보기</button>
+    </section>
   </div>
 
+  <script src="data.js"></script>
   <script src="script.js"></script>
 </body>
 </html>

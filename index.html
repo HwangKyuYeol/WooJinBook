@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>우진이의 기차 여행</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="book-app">
+    <div class="topbar">
+      <strong>우진이의 기차 여행</strong>
+      <span id="counter">1 / 6</span>
+    </div>
+
+    <main id="book" class="book" aria-live="polite">
+      <section class="page active"><img src="assets/01_cover.jpg" alt="우진이의 기차 여행 표지"></section>
+      <section class="page"><img src="assets/02_spring.jpg" alt="봄 꽃길을 달리는 기차"></section>
+      <section class="page"><img src="assets/03_summer.jpg" alt="여름 바다를 지나는 기차"></section>
+      <section class="page"><img src="assets/04_autumn.jpg" alt="가을 단풍길을 지나는 기차"></section>
+      <section class="page"><img src="assets/05_winter.jpg" alt="겨울 눈마을을 지나는 기차"></section>
+      <section class="page"><img src="assets/06_happy_station.jpg" alt="행복역에 도착한 우진이"></section>
+    </main>
+
+    <button class="tap-zone left" id="prev" aria-label="이전 페이지"></button>
+    <button class="tap-zone right" id="next" aria-label="다음 페이지"></button>
+
+    <div class="controls">
+      <button id="prevBtn">← 이전</button>
+      <button id="nextBtn">다음 →</button>
+    </div>
+  </div>
+  <script src="script.js"></script>
+</body>
+</html>
